@@ -10,113 +10,125 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: "Microsoft YaHei", sans-serif;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden; /* 防止整个页面滚动 */
         }
 
-        /* 主容器布局 */
-        .main-container {
+        /* 主容器：使用 Flex 布局 */
+        .app-wrapper {
             display: flex;
-            height: 100vh;
             width: 100vw;
+            height: 100vh;
+            background-color: #f0f2f5;
         }
 
-        /* 左侧边栏修复 */
+        /* 左侧边栏：修复丢失和占比问题 */
         .sidebar {
-            width: 350px;
-            background-color: #f8f9fa;
-            border-right: 1px solid #dee2e6;
+            width: 380px; /* 固定宽度，防止被右侧挤压 */
+            min-width: 380px;
+            background-color: #ffffff;
+            border-right: 1px solid #e0e0e0;
             display: flex;
-            flex-direction: column; /* 纵向排列内部元素 */
+            flex-direction: column;
             padding: 20px;
             box-sizing: border-box;
-            z-index: 10;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            z-index: 100;
         }
 
         .sidebar h2 {
-            margin-top: 0;
-            color: #333;
-            font-size: 1.5rem;
+            margin: 0 0 10px 0;
+            color: #1a1a1a;
+            font-size: 22px;
         }
 
-        .status {
+        .status-text {
+            color: #52c41a;
             font-size: 14px;
-            color: #28a745;
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .status-text::before {
+            content: "●";
+            margin-right: 6px;
         }
 
         #toggle-desmos {
+            width: 100%;
             padding: 10px;
-            background-color: #007bff;
+            background-color: #1890ff;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            margin-bottom: 15px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            transition: background 0.3s;
         }
 
         #toggle-desmos:hover {
-            background-color: #0056b3;
+            background-color: #40a9ff;
         }
 
+        /* 导语部分 */
         .intro {
             font-size: 14px;
-            color: #666;
+            color: #595959;
             line-height: 1.6;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        /* 对话框核心区域修复 */
-        #chat-container {
-            flex: 1; /* 自动占据剩余的所有垂直空间 */
-            display: flex;
-            flex-direction: column;
-            overflow: hidden; /* 防止溢出 */
-            background: #fff;
+            background: #f9f9f9;
+            padding: 12px;
             border-radius: 8px;
-            border: 1px solid #eee;
+            margin-bottom: 20px;
         }
 
-        /* 消息显示区 */
-        #chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
+        /* --- 核心修复：对话框区域 --- */
+        #chat-container {
+            flex-grow: 1; /* 关键：自动填满下方所有空间 */
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
         }
 
-        /* 输入区域 */
-        .chat-input-area {
-            padding: 10px;
-            border-top: 1px solid #eee;
+        #chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #fafafa;
+        }
+
+        .input-area {
             display: flex;
-            gap: 10px;
+            padding: 10px;
+            border-top: 1px solid #d9d9d9;
+            background: white;
         }
 
         #user-input {
-            flex: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #d9d9d9;
             border-radius: 4px;
             outline: none;
         }
 
         #send-btn {
-            padding: 8px 15px;
-            background: #28a745;
+            margin-left: 8px;
+            padding: 8px 16px;
+            background: #1890ff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
         }
 
-        /* 右侧 Desmos 区域 */
-        .desmos-wrapper {
-            flex: 1;
+        /* 右侧 Desmos 绘图区 */
+        .main-content {
+            flex-grow: 1; /* 占据除侧边栏外的所有空间 */
             position: relative;
             background: #fff;
         }
@@ -126,87 +138,76 @@
             height: 100%;
         }
     </style>
-    <script src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 </head>
 <body>
 
-<div class="main-container">
+<div class="app-wrapper">
     <div class="sidebar">
         <h2>数学核心素养AI</h2>
-        <p class="status">● 状态：已连接</p>
+        <div class="status-text">状态：已连接</div>
         
         <button id="toggle-desmos">开启/关闭 Desmos</button>
         
         <div class="intro">
-            你好！我是数学助手 AI。您可以输入数学问题，我会为您解答并在此展示绘图。
+            你好！我是数学助手 AI，点击上方按钮可以调出图形计算器。请在下方输入您的数学问题。
         </div>
 
         <div id="chat-container">
             <div id="chat-messages">
-                <div style="color:#888; font-size: 12px; text-align: center; margin-top: 10px;">对话开始</div>
-            </div>
-            <div class="chat-input-area">
-                <input type="text" id="user-input" placeholder="输入您的问题...">
+                </div>
+            <div class="input-area">
+                <input type="text" id="user-input" placeholder="输入问题或公式...">
                 <button id="send-btn">发送</button>
             </div>
         </div>
     </div>
 
-    <div class="desmos-wrapper" id="graph-panel">
+    <div class="main-content" id="desmos-panel">
         <div id="calculator"></div>
     </div>
 </div>
 
+<script src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 <script>
     // 初始化 Desmos
     const elt = document.getElementById('calculator');
     const calculator = Desmos.GraphingCalculator(elt);
 
-    // 开启/关闭 Desmos 面板的逻辑
+    // 显隐切换逻辑
     const toggleBtn = document.getElementById('toggle-desmos');
-    const graphPanel = document.getElementById('graph-panel');
-    
+    const panel = document.getElementById('desmos-panel');
     toggleBtn.addEventListener('click', () => {
-        if (graphPanel.style.display === 'none') {
-            graphPanel.style.display = 'block';
-        } else {
-            graphPanel.style.display = 'none';
+        panel.style.display = (panel.style.display === 'none') ? 'block' : 'none';
+        // 切换后需要通知 Desmos 调整尺寸
+        if(panel.style.display !== 'none') {
+            calculator.resize();
         }
     });
 
-    // 简单的发送逻辑演示
+    // 简易聊天逻辑
     const sendBtn = document.getElementById('send-btn');
     const userInput = document.getElementById('user-input');
-    const chatMessages = document.getElementById('chat-messages');
+    const messages = document.getElementById('chat-messages');
 
-    sendBtn.addEventListener('click', () => {
-        const text = userInput.value.trim();
-        if (text) {
-            // 添加用户消息
-            const msg = document.createElement('div');
-            msg.innerHTML = `<strong>你:</strong> ${text}`;
-            msg.style.marginBottom = "10px";
-            chatMessages.appendChild(msg);
-            
-            userInput.value = '';
-            // 自动滚动到底部
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            // 模拟AI回复
-            setTimeout(() => {
-                const aiMsg = document.createElement('div');
-                aiMsg.innerHTML = `<strong>AI:</strong> 收到！正在为您计算...`;
-                aiMsg.style.color = "#007bff";
-                chatMessages.appendChild(aiMsg);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 500);
+    function addMessage(role, text) {
+        const div = document.createElement('div');
+        div.style.marginBottom = "12px";
+        div.innerHTML = `<strong>${role}:</strong> <span style="margin-left:5px;">${text}</span>`;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    sendBtn.onclick = () => {
+        const val = userInput.value.trim();
+        if(val) {
+            addMessage("我", val);
+            userInput.value = "";
+            // 模拟回复
+            setTimeout(() => addMessage("AI", "正在为您分析该数学问题..."), 600);
         }
-    });
+    };
 
-    // 支持回车发送
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendBtn.click();
-    });
+    userInput.onkeypress = (e) => { if(e.key === 'Enter') sendBtn.click(); };
 </script>
 
 </body>
