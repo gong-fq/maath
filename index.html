@@ -3,150 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>数学核心素养AI - 完美行列式版</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>数学核心素养AI - Desmos集成版</title>
     
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script>
-        window.MathJax = {
-            tex: {
-                inlineMath: [['$', '$']],
-                displayMath: [['$$', '$$']],
-                processEscapes: true,
-                macros: {
-                    ddet: ["\\begin{vmatrix} #1 \\end{vmatrix}", 1],
-                    ppmat: ["\\begin{pmatrix} #1 \\end{pmatrix}", 1]
-                }
-            },
-            options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-            }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="https://www.desmos.com/api/v1.9/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; }
-        body { background-color: #f5f7fa; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        .container { display: flex; flex-direction: row; flex: 1; width: 100%; height: 100vh; padding: 15px; gap: 20px; overflow: hidden; }
-        .left-panel { flex: 0 0 280px; background: linear-gradient(135deg, #1a2980, #26d0ce); border-radius: 20px; padding: 25px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow-y: auto; }
-        .right-panel { flex: 1; display: flex; flex-direction: column; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .chat-container { flex: 1; padding: 25px; overflow-y: auto; background-color: #fafbfd; display: flex; flex-direction: column; gap: 20px; }
-        .message { max-width: 85%; padding: 15px 20px; border-radius: 18px; line-height: 1.7; word-wrap: break-word; position: relative; }
-        .ai-message { align-self: flex-start; background: white; border: 1px solid #e1f0ff; }
-        .user-message { align-self: flex-end; background: linear-gradient(135deg, #1a2980, #26d0ce); color: white; }
-        .input-area { padding: 20px; border-top: 1px solid #eee; }
-        .input-container { display: flex; gap: 12px; align-items: flex-end; }
-        .input-box { flex: 1; border: 1px solid #ddd; border-radius: 12px; padding: 12px; font-size: 15px; resize: none; min-height: 50px; }
-        .send-btn { background: #1a2980; color: white; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; transition: opacity 0.2s; }
-        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        #desmos-container { height: 320px; border-top: 1px solid #eee; display: none; }
-        .tool-bar { padding: 10px 20px; background: #f8f9fa; border-top: 1px solid #eee; display: flex; gap: 10px; }
-        .tool-btn { font-size: 12px; padding: 6px 15px; border-radius: 20px; border: 1px solid #1a2980; color: #1a2980; cursor: pointer; background: white; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f5f7fa;
+        }
+
+        #main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Desmos 容器样式：必须有明确的宽高 */
+        #desmos-container {
+            flex: 1;
+            height: 100%;
+            border-left: 2px solid #ccc;
+            display: none; /* 初始隐藏，由按钮控制 */
+        }
+
+        .chat-area {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background: white;
+        }
+
+        button#toggle-desmos {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        button#toggle-desmos:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="left-panel">
-            <h1 style="font-size: 20px; margin-bottom: 8px;">数学核心素养AI</h1>
-            <p style="font-size: 12px; opacity: 0.8;">龚凤乾教授设计</p>
-            <hr style="margin: 15px 0; opacity: 0.2;">
-            <div style="font-size: 13px;">
-                <p><strong>✅ 状态:</strong> 已切换至非流式传输</p>
-                <p><strong>✅ 渲染:</strong> MathJax 完美支持</p>
+
+    <div id="main-layout">
+        <div class="chat-area">
+            <h3>数学核心素养AI</h3>
+            <p>状态：已连接</p>
+            <button id="toggle-desmos">开启/关闭 Desmos</button>
+            <div id="chat-history">
+                <p>你好！我是数学助手 AI，点击上方按钮可以调出图形计算器。</p>
             </div>
         </div>
 
-        <div class="right-panel">
-            <div class="chat-container" id="chatContainer">
-                <div class="message ai-message">您好！连接已修复。请问有什么数学问题我可以帮您？</div>
-            </div>
-            <div id="desmos-container"></div>
-            <div class="tool-bar">
-                <button class="tool-btn" id="toggleDesmos">开启/关闭 Desmos</button>
-                <button class="tool-btn" id="clearChat">清空对话</button>
-            </div>
-            <div class="input-area">
-                <div class="input-container">
-                    <textarea class="input-box" id="messageInput" placeholder="输入数学问题..."></textarea>
-                    <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </div>
+        <div id="desmos-container"></div>
     </div>
 
     <script>
-        const chatContainer = document.getElementById('chatContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const desmosEl = document.getElementById('desmos-container');
-        let calculator = null;
-        
-        // 确保此路径与 netlify.toml 中的配置一致
-        const API_URL = "/api/deepseek";
+        // 使用 DOMContentLoaded 确保页面元素（ID）加载完毕后再执行 JS
+        document.addEventListener("DOMContentLoaded", function() {
+            const elt = document.getElementById('desmos-container');
+            const btn = document.getElementById('toggle-desmos');
+            let calculator = null;
 
-        let chatHistory = [{
-            role: "system",
-            content: "你是数学助学AI。公式用LaTeX,如 $x^2$。绘图用 [GRAPH: y=x^2]。"
-        }];
-
-        function formatMathText(text) {
-            return marked.parse(text.replace(/\\\\/g, '\\\\\\\\'));
-        }
-
-        function addMessageToUI(role, text) {
-            const div = document.createElement('div');
-            div.className = `message ${role}-message`;
-            const contentDiv = document.createElement('div');
-            contentDiv.innerHTML = role === 'ai' ? formatMathText(text) : text;
-            div.appendChild(contentDiv);
-            chatContainer.appendChild(div);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            return div;
-        }
-
-        async function handleSend() {
-            const content = messageInput.value.trim();
-            if (!content || sendBtn.disabled) return;
-
-            addMessageToUI('user', content);
-            messageInput.value = '';
-            sendBtn.disabled = true;
-
-            const aiDiv = addMessageToUI('ai', '正在思考...');
-            chatHistory.push({ role: "user", content: content });
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ messages: chatHistory })
-                });
-
-                if (!response.ok) throw new Error(`HTTP错误 ${response.status}`);
-
-                // ⚡ 关键修改：直接获取 JSON 数据
-                const result = await response.json();
-                const aiResponse = result.choices[0].message.content;
-
-                aiDiv.querySelector('div').innerHTML = formatMathText(aiResponse);
-                
-                if (window.MathJax) {
-                    MathJax.typesetPromise([aiDiv.querySelector('div')]);
+            // 按钮点击事件
+            btn.addEventListener('click', function() {
+                if (elt.style.display === 'none' || elt.style.display === '') {
+                    // 显示容器
+                    elt.style.display = 'block';
+                    
+                    // 如果计算器还没初始化，则初始化它
+                    if (!calculator) {
+                        calculator = Desmos.GraphingCalculator(elt, {
+                            expressions: true,
+                            settingsMenu: true,
+                            smartGraph: true
+                        });
+                        console.log("Desmos 初始化成功");
+                    }
+                    
+                    // 强制刷新尺寸，防止显示不全
+                    calculator.resize();
+                } else {
+                    // 隐藏容器
+                    elt.style.display = 'none';
                 }
-
-                chatHistory.push({ role: "assistant", content: aiResponse });
-
-            } catch (error) {
-                aiDiv.querySelector('div').innerHTML = `<span style="color:red;">❌ 连接失败: ${error.message}<br>请检查函数部署路径。</span>`;
-            } finally {
-                sendBtn.disabled = false;
-            }
-        }
-
-        sendBtn.onclick = handleSend;
-        messageInput.onkeydown = (e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
+            });
+        });
     </script>
 </body>
 </html>
